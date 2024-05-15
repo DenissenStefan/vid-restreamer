@@ -1,4 +1,4 @@
-# Project Title
+# Video Restreamer
 
 This project is intended to restream video streams. It is created out of a use case where multicast videofeeds needed to be converted to unicast streams keeping the FMV KLV data intact.
 
