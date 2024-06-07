@@ -26,7 +26,7 @@ Location of the CSV with the videostreams is located at `/etc/restream/streams.c
 version: '3.7'
 services:
   restream:
-    image: denissenstefan/restream:latest
+    image: denissenstefan/vid-restreamer:latest
     container_name: restream
     volumes:
       - /path/to/streams.csv:/etc/restream/streams.csv
