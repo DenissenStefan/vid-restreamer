@@ -1,5 +1,17 @@
 # Changelog
 
+## [Version 2.0.0] - 2025-04-25
+
+### Added
+
+- Added UI for adding & removing video streams
+
+### Modified
+
+- Changed bash script to python scripts
+- Changed FFMPEG to GStreamer
+- Updated README.md
+
 ## [Version 1.2.0] - 2024-06-09
 
 ### Fixed

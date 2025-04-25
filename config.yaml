@@ -1,0 +1,4 @@
+streams:
+- input: udp://236.1.2.3:18000
+  name: camera1
+  output: udp://236.1.2.4:18000
