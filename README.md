@@ -7,8 +7,10 @@ Currently the following restream options are supported by the container:
 | Input | Output | Status |
 | --- | --- | --- |
 | Multicast | Multicast | :white_check_mark: Working |
-| SRT | Multicast | :question: Not yet tested |
-| Multicast | SRT | :question: Not yet tested |
+| UDP Unicast | Multicast | :white_check_mark: Working |
+| Multicast | UDP Unicast | :white_check_mark: Working |
+| SRT | Multicast | :x: Won't ingest SRT |
+| Multicast | SRT | :x: Won't output SRT |
 
 ## Getting Started
 
@@ -49,12 +51,18 @@ streams:
 - input: udp://236.1.2.3:18000
   name: multicast-to-multicast-example
   output: udp://236.1.2.4:18000
-- input: srt://
-  name: unicast-to-multicast-example
+- input: srt://0.0.0.0:9000
+  name: srt-to-multicast-example
   output: udp://236.1.2.4:18000
 - input: udp://236.1.2.3:18000
-  name: multicast-to-unicast-example
-  output: srt://
+  name: multicast-to-srt-example
+  output: srt://192.168.1.24:9000
+- input: udp://236.1.2.3:18000
+  name: multicast-to-udp-example
+  output: udp://192.168.1.25:90001
+- input: udp://0.0.0.0:9002
+  name: udp-to-multicast-example
+  output: udp://236.1.2.3:18000
 ```
 
 ## Known issues
