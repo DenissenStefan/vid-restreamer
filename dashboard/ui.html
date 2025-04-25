@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FMV Dashboard</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.2"></script>
+<script>
+  async function fetchHealthStatus() {
+    try {
+      const response = await fetch("/healthz");
+      const text = await response.text();
+      const cleaned = text.trim().replace(/%+$/, "");
+      return JSON.parse(cleaned);
+    } catch (err) {
+      console.error("Health check parse error:", err);
+      return {};
+    }
+  }
+</script>
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    .status { padding: 0.5em; border: 1px solid #ccc; margin-bottom: 1em; }
+    .healthy { color: green; }
+    .unhealthy { color: red; }
+  </style>
+</head>
+<body>
+  <h1>FMV Stream Dashboard</h1>
+
+  <div>
+    <h2>Add New Stream</h2>
+    <form hx-put="/config" hx-trigger="submit" hx-target="#message" hx-swap="innerHTML">
+      <input name="name" placeholder="Stream name" required><br>
+      <input name="input" placeholder="Input URL" required><br>
+      <input name="output" placeholder="Output URL" required><br>
+      <button type="submit">Add + Reload</button>
+    </form>
+    <div id="message"></div>
+  </div>
+
+  <div>
+    <h2>Stream Health</h2>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    document.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const obj = {
+        name: data.get("name"),
+        input: data.get("input"),
+        output: data.get("output")
+      };
+      const config = await fetch("/config").then(r => r.text());
+      const doc = config + `\n  - name: ${obj.name}\n    input: ${obj.input}\n    output: ${obj.output}`;
+      await fetch("/config", { method: "PUT", headers: {"Content-Type": "text/plain"}, body: doc });
+      await fetch("/reload", { method: "POST" });
+      document.getElementById("message").innerText = "Stream added and reloaded.";
+    });
+
+    setInterval(async () => {
+      const raw = await fetchHealthStatus();
+      const div = document.getElementById("status");
+      const status = typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+      div.innerHTML = Object.entries(status).map(([name, s]) => {
+        return `<div class='status'>
+          <strong>${name}</strong>: <span class='${s.status}'>${s.status}</span>
+          <button onclick="deleteStream('${name}')">🗑 Remove</button>
+        </div>`;
+      }).join('');
+    }, 5000);
+
+    async function deleteStream(name) {
+      const modal = document.createElement("div");
+      modal.style.position = "fixed";
+      modal.style.top = "0";
+      modal.style.left = "0";
+      modal.style.width = "100%";
+      modal.style.height = "100%";
+      modal.style.background = "rgba(0,0,0,0.5)";
+      modal.style.display = "flex";
+      modal.style.justifyContent = "center";
+      modal.style.alignItems = "center";
+      modal.innerHTML = `
+        <div style='background: white; padding: 2em; border-radius: 8px; max-width: 300px; text-align: center;'>
+          <p>Are you sure you want to remove <strong>${name}</strong>?</p>
+          <button id='confirmDelete'>Yes, remove</button>
+          <button id='cancelDelete'>Cancel</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById("cancelDelete").onclick = () => modal.remove();
+      document.getElementById("confirmDelete").onclick = async () => {
+        await fetch(`/stream/${name}`, { method: 'DELETE' });
+        document.getElementById("message").innerText = `Stream '${name}' removed and config reloaded.`;
+        modal.remove();
+      };
+    }
+  </script>
+</body>
+</html>
