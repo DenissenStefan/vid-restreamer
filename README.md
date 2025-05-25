@@ -27,18 +27,16 @@ If doing a GIT clone it is possible to execute a `docker compose build` followed
 ### Docker run
 
 ```sh
-docker run --net host --name denissenstefan/restream:latest -v ./config.yaml:/app/config.yaml --restart unless-stopped 
+docker run --net host --name denissenstefan/vid-restreamer:latest -v ./config.yaml:/app/config.yaml --restart unless-stopped 
 ```
 
 ### Docker-Compose
 
 ```yml
-version: '3.8'
-
 services:
   restreamer:
     network_mode: host
-    container_name: denissenstefan/restream:latest
+    image: denissenstefan/vid-restreamer:latest
     volumes:
       - ./config.yaml:/app/config.yaml
     restart: unless-stopped
